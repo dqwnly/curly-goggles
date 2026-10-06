@@ -73,7 +73,7 @@ jobs:
           # Save IP to env
           echo "TS_IP=$tsIP" >> $env:GITHUB_ENV
 
-      - name: Keep alive for 6 hours
+      - name: Keep alive for 6 hours then self-delete
         shell: powershell
         run: |
           $tsExe = "C:\Program Files\Tailscale\tailscale.exe"
@@ -93,6 +93,15 @@ jobs:
             ).TotalHours -lt 6
           ) {
               $tsIP = & $tsExe ip -4
-              Write-Host "[$(Get-Date)] Alive — Tailscale IP: $tsIP"
+              Write-Host "[$(Get-Date)] Alive - Tailscale IP: $tsIP"
               Start-Sleep -Seconds 300
           }
+
+          Write-Host "6 hours up - logging out of Tailscale..."
+
+          # logout removes the node from your devices list entirely
+          & $tsExe logout
+
+          Start-Sleep -Seconds 5
+
+          Write-Host "Done - node removed from Tailscale devices"
